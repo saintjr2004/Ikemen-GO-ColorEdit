@@ -1,0 +1,240 @@
+;------------------------------------------------------------------------
+; IKEMEN Color Editor Module by jay_ts & m14
+;------------------------------------------------------------------------
+; README
+;------------------------------------------------------------------------
+
+; = COLOR EDIT MODULE (2/2/26) by jay_ts & m14 =
+
+; = INSTALL INSTRUCTIONS =
+; Place coloredit.def, coloredit.lua and coloredit-util.lua into
+; external/mods. Alternatively, you can call coloredit.lua as a
+; module in the config.ini file. The mp3 file is optional, but if
+; you want to keep it as is you can move that to your mods folder
+; or whatever folder you're moving the main files into as well.
+
+; Once you do that, you need to declare it as a mode in your
+; system.def file. Just copy and paste the following:
+  menu.itemname.coloredit = "COLOR EDIT" 
+; Place it under [Title Info] in your system.def file.
+
+; Below this readme are all the motif parameters you can edit to fit
+; your screenpack design.
+
+; = DISCLAIMERS =
+; Due to the rapid updating of IKEMEN nightly, this may
+; break in future builds. Let me know if this happens.
+; Also due to the very recent nature of the nightly build,
+; some of your lua modules will break. Just a heads up.
+
+; IKEMEN NIGHTLY VERSION: 01/18/26, 2:22AM
+; This is the oldest nightly version this module works on, but it is
+; recommended you always update your IKEMEN to the latest version.
+
+; = DEFAULT CONTROLS =
+; Move Cell Cursor: Directions (during Color Selecting)
+; Select Color: A/LK (duing Color Selecting)
+; Cancel Color: B/MK (during Color Editing)
+; Confirm Color: A/LK (during Color Editing)
+; Move Slider: Up/Down (during Color Editing)
+; Select RGBA: Left/Right (during Color Editing)
+; Save Color: Start
+; Cycle through animations: X/LP or Y/MP
+; Delete Backup File: Z/HP
+
+; Enjoy!
+ 
+;------------------------------------------------------------------------
+[Info]
+localcoord = 1280,720
+
+;------------------------------------------------------------------------
+[ColorEdit Info]
+; title
+title.offset = 640,38
+title.font = 4,0,0
+title.scale = 1.0, 1.0
+title.text = "COLOR EDIT"
+
+; create backup of act on startup
+backupfiles = 0
+
+; fade
+fadein.time = 10
+fadein.col = 0, 0, 0
+fadein.anim = -1
+fadein.snd = -1, 0
+fadeout.time = 10
+fadeout.col = 0, 0, 0
+fadeout.anim = -1
+fadeout.snd = -1, 0
+
+; music
+bgm.path = external/mods/coloredit.mp3
+bgm.loop = 1
+bgm.volume = 100
+bgm.loopstart = 
+bgm.loopend = 
+bgm.startposition = 0
+bgm.freqmul = 1.0
+bgm.loopcount = -1
+
+; sound
+move.snd = 100, 0
+cancel.snd = 100, 2
+done.snd = 100, 1
+
+; color cells
+cell.cursor.up.key = holdup
+cell.cursor.down.key = holddown
+cell.cursor.fwd.key = holdfwd
+cell.cursor.back.key = holdback
+cell.select.key = a
+cell.confirm.key = a
+cell.cancel.key = b
+cell.offset = -280, 120
+cell.size = 40,40
+cell.columns = 16
+cell.cursor.anim = 160
+cell.cursor.offset = 0.75, 0
+cell.cursor.scale = 0.125, 0.125
+
+; preview portrait
+pos = 640,360
+preview.offset = 0,80
+preview.scale = 3, 3
+preview.next.key = y
+preview.prev.key = x
+
+; anims to exclude from preview, and what range of anims should be accessible
+anim.exclude = 5,6,10,12,40,47,140,141,142,150,151,152,5005,5006,5007,5015,5016,5017,5025,5026,5027,5150,5160,5210
+anim.range = 0, 32768
+
+; color sliders
+slider.increase.key = holdup
+slider.decrease.key = holddown
+slider.next.key = $F
+slider.prev.key = $B
+
+slider.cursor.spr = 400, 0
+slider.cursor.offset = 0, 15
+slider.cursor.scale = 0.5, 0.5
+
+slider.r.size = 40, 360
+slider.g.size = 40, 360
+slider.b.size = 40, 360
+slider.a.size = 40, 360
+slider.prev.size = 160, 100
+
+slider.r.col = 255, 0, 0
+slider.g.col = 0, 255, 0
+slider.b.col = 0, 0, 255
+slider.a.col = 255, 255, 255
+
+slider.r.offset = -480, 160
+slider.g.offset = -440, 160
+slider.b.offset = -400, 160
+slider.a.offset = -360, 160
+slider.prev.offset = -480, 260
+
+slider.r.display.font = 3,0,0, 255, 80, 80
+slider.g.display.font = 3,0,0, 80, 255, 80
+slider.b.display.font = 3,0,0, 80, 80, 255
+slider.a.display.font = 3,0,0, 80, 80, 80
+slider.r.display.offset = 20, -360
+slider.g.display.offset = 20, -360
+slider.b.display.offset = 20, -360
+slider.a.display.offset = 20, -360
+slider.r.display.scale = 0.3333, 0.3333
+slider.g.display.scale = 0.3333, 0.3333
+slider.b.display.scale = 0.3333, 0.3333
+slider.a.display.scale = 0.3333, 0.3333
+
+slider.a.alpha = 128, 128
+
+; save/warning
+save.key = s
+save.offset = 690,575
+save.font = 2,1,0
+save.scale = 1.2, 1.2
+save.text = "Color %d has been saved."
+save.time = 120
+
+warning.offset = 690,575
+warning.font = 2,1,0
+warning.scale = 1.2, 1.2
+warning.text = "You have unsaved changes.\nExit anyway?"
+warning.confirm.key = x,y,z,a,b,c,s
+warning.switch.key = $F, $B
+
+delete.key = z
+delete.offset = 690,575
+delete.font = 2,1,0
+delete.scale = 1.2, 1.2
+delete.text = "You're about to \ndelete the backup color file.\nProceed?"
+
+deleted.offset = 690,575
+deleted.font = 2,1,0
+deleted.scale = 1.2, 1.2
+deleted.text = "Color %d's backup has been deleted."
+deleted.time = 120
+
+yes.text = "Yes"
+yes.font = 2,1,0, 128,128,128
+yes.scale = 1.0, 1.0
+yes.offset = 640, 625
+yes.active.text = "YES"
+yes.active.font = 2,1,0
+yes.active.scale = 1.4, 1.4
+yes.active.offset = 640, 625
+
+no.text = "No"
+no.font = 2,1,0, 128,128,128
+no.scale = 1.0, 1.0
+no.offset = 740, 625
+no.active.text = "NO"
+no.active.font = 2,1,0
+no.active.scale = 1.4, 1.4
+no.active.offset = 740, 625
+
+;------------------------------------------------------------------------
+[ColorEditBGdef]
+bgclearcolor = 0,0,0
+
+[ColorEditBG 0] ;Scrolling background
+type  = normal
+spriteno = 100,0
+layerno = 0
+start = 0,0
+tile  = 1,1
+velocity = -1, -1
+
+[ColorEditBG 1.A] ;Title background A
+type  = normal
+spriteno = 102,0
+layerno = 0
+start = 0, 4
+delta = 0,0
+tile  = 1,3
+trans = sub
+velocity = -1, 0
+
+[ColorEditBG 1.B] ;Title background B
+type  = normal
+spriteno = 102,1
+layerno = 0
+start = 0, 4
+delta = 0,0
+tile  = 1,3
+trans = add
+velocity = -3, 0
+
+[ColorEditBG 1.C] ;Title background C
+type  = normal
+spriteno = 102,2
+layerno = 0
+start = 0, 4
+delta = 0,0
+tile  = 1,3
+trans = add
+velocity = -9, 0
