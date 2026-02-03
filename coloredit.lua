@@ -202,7 +202,7 @@ function start.f_colorEdit()
 	if act == nil then
 		util.writeDefEntry(def, "Files", "pal" .. tostring(pal), "color" .. tostring(pal) .. ".act")
 		act = util.getDefPath(def, "pal" .. tostring(pal))
-		util.saveActFile(act, colorTable)
+		util.saveActFile(act, colorTable, #colorTable)
 	end
 	
 	local backup = act .. ".bak"
@@ -315,7 +315,7 @@ function start.f_colorEdit()
 				if getInput(-1, 
 					type(m.save.key) == "table" and m.save.key or {m.save.key}
 					) then
-					util.saveActFile(act, colorTable)
+					util.saveActFile(act, colorTable, #colorTable)
 					saveTextTimer = m.save.time
 					deletedTextTimer = 0
 					sffCacheDelete(sff)
@@ -759,4 +759,5 @@ function start.f_animGet(ref, side, member, params, velParams, loop, srcAnim)
 		end
 	end
 	return nil
+
 end
