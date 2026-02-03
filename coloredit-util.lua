@@ -116,10 +116,10 @@ function t.createBackupFile(file)
 	copy:close()
 end
 
-function t.saveActFile(act, tbl)
+function t.saveActFile(act, tbl, depth)
 	local f = io.open(act, "wb")
 	
-	for i = 256, 1, -1 do
+	for i = depth, 1, -1 do
 		f:write(string.char(tbl[i][1]))
 		f:write(string.char(tbl[i][2]))
 		f:write(string.char(tbl[i][3]))
@@ -342,5 +342,6 @@ function t.rectNew()
 end
 
 -- chinese mario
+
 
 return t
