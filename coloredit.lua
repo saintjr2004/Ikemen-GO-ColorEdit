@@ -144,9 +144,6 @@ function start.f_colorEdit()
 	
 	local palDisplay = {}
 	local displayRect = {}
-	
-	local cols = m.cell.columns
-	local rows = math.ceil(256 / cols)
 
 	-- cell (x, y), slider, anim, warning, delete
 	local cursorPos = {1,2,1,idle,2,2}
@@ -164,8 +161,8 @@ function start.f_colorEdit()
 		return anim
 	end
 	
-	local function copyPalData(anim, pal, tbl)
-		for i = 1, 255 do
+	local function copyPalData(anim, pal, tbl, depth)
+		for i = 1, depth do
 			animPaletteSet(anim, pal, {[i] = {
 				tbl[i][1],
 				tbl[i][2],
@@ -177,6 +174,13 @@ function start.f_colorEdit()
 
 	local anim = loadAnim(cursorPos[4])
 	
+	animUpdate(anim)
+	
+	local colorTable = animPaletteGet(anim, pal)
+	
+	local cols = m.cell.columns
+	local rows = math.ceil(#colorTable / cols)
+	
 	for y = 1, rows do
 		palDisplay[y] = {}
 		for x = 1, cols do
@@ -186,10 +190,6 @@ function start.f_colorEdit()
 	for _, k in pairs(rects) do
 		displayRect[k] = util.rectNew()
 	end
-	
-	animUpdate(anim)
-	
-	local colorTable = animPaletteGet(anim, pal)
 
 	-- Check if act exists, if not then make a new act
 	-- with the color data of the chosen palette and
@@ -338,7 +338,7 @@ function start.f_colorEdit()
 					end
 					sndPlay(motif.Snd, m.move.snd[1], m.move.snd[2])
 					anim = loadAnim(cursorPos[4])
-					copyPalData(anim, pal, colorTable)
+					copyPalData(anim, pal, colorTable, #colorTable)
 				end
 				if getInput(-1,
 					type(m.preview.next.key) == "table" and m.preview.next.key or {m.preview.next.key}
@@ -349,7 +349,7 @@ function start.f_colorEdit()
 					end
 					sndPlay(motif.Snd, m.move.snd[1], m.move.snd[2])
 					anim = loadAnim(cursorPos[4])
-					copyPalData(anim, pal, colorTable)
+					copyPalData(anim, pal, colorTable, #colorTable)
 				end
 			-- Color editing
 			elseif selectMode == 2 then
@@ -759,5 +759,4 @@ function start.f_animGet(ref, side, member, params, velParams, loop, srcAnim)
 		end
 	end
 	return nil
-
 end
