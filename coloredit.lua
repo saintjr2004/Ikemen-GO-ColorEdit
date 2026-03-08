@@ -1,9 +1,10 @@
 -- IKEMEN Color Editor Module by jay_ts & m14
+-- Updated by Rakíel 02/28/2026
 -- Main
 
-local util = require("external.mods.coloredit-util")
+local util = require("external.mods.coloredit.coloredit-util")
 
-util.loadMotifExtensions("external/mods/coloredit.def", "external/mods/coloredit.def")
+util.loadMotifExtensions("external/mods/coloredit/coloredit.def", "external/mods/coloredit/coloredit.def")
 local coloredit = {}
 local m = motif.coloredit_info
 
@@ -21,9 +22,9 @@ local function isExcluded(anim)
 end
 
 -- Init anims
-local rects = {"r", "g", "b", "a", "prev"}
-local warnings = {"warning", "yes", "no", "yes.active", "no.active"}
-local delete = {"delete", "yes", "no", "yes.active", "no.active"}
+local rects         = {"r", "g", "b", "a", "prev"}
+local warnings      = {"warning", "yes", "no", "yes.active", "no.active"}
+local delete        = {"delete", "yes", "no", "yes.active", "no.active"}
 local aCursorBg		= util.loadMotifAnim(m.cell.cursor)
 local aSliderBg		= util.loadMotifAnim(m.slider.cursor)
 local tsTitle		= util.loadMotifFont(m.title)
@@ -56,19 +57,6 @@ main.t_itemname.coloredit = function()
 	return start.f_colorEdit
 end
 
--- Commands
-main.f_commandAdd("holdup", "/$U", 1, 1)
-main.f_commandAdd("holddown", "/$D", 1, 1)
-main.f_commandAdd("holdfwd", "/$F", 1, 1)
-main.f_commandAdd("holdback", "/$B", 1, 1)
-
-local hold = {
-	["U"] = 0,
-	["D"] = 0,
-	["F"] = 0,
-	["B"] = 0
-}
-
 local colorEditedFlag = false
 
 local function animNewWithPalette(sff, anim, ref, pal)
@@ -85,8 +73,8 @@ function start.f_colorEdit()
 	-- Init itemname vals
 	start.f_selectReset(true)
 	main.f_default()
-    remapInput(1, 1)
-    setCommandInputSource(2, 1)
+	remapInput(1, getLastInputController())
+	remapInput(getLastInputController(), 1)
 	main.teamMenu[1].single = true
 	local ok = false
 	main.close = false
@@ -212,19 +200,13 @@ function start.f_colorEdit()
 		util.createBackupFile(act)
 	end
 	
-	local dt = 0
-	local speed = 0
-	local speedStep = 0
-	local speedCooldown = 0
-	
 	local saveTextTimer = 0
 	local deletedTextTimer = 0
 	
 	-- MAIN LOOP
 	while true do
-		-- Cursor index, dt vals
+		-- Cursor index vals
 		local idx = (((cursorPos[1] - 1) * cols) + cursorPos[2]) - 1
-		dt = dt + 1
 		animSetPos(anim,
 			m.pos[1] + m.preview.offset[1],
 			m.pos[2] + m.preview.offset[2])
@@ -237,84 +219,53 @@ function start.f_colorEdit()
 			main.close = false
 			break
 		elseif selectMode == 1 and (getInput(-1, {"m"}) or esc()) then
-			if changed == true then sndPlay(motif.Snd, m.done.snd[1], m.done.snd[2]) end
-			saveTextTimer = 0
-			deletedTextTimer = 0
-			selectMode = 0
-		elseif selectMode == 0 and (changed == false or (getInput(-1, 
-			type(m.warning.confirm.key) == "table" and m.warning.confirm.key or {m.warning.confirm.key}
-			) and cursorPos[5] == 1)) then
-			selectMode = 3
-			sndPlay(motif.Snd, m.cancel.snd[1], m.cancel.snd[2])
-			main.f_fadeReset("fadeout", m)
-			playBgm({source = "motif.title", interrupt = true})
-			main.close = true
+			if changed == true then 
+				sndPlay(motif.Snd, m.done.snd[1], m.done.snd[2])
+				selectMode = 0
+				cursorPos[5] = 2
+			else
+				selectMode = 3
+				sndPlay(motif.Snd, m.cancel.snd[1], m.cancel.snd[2])
+				main.f_fadeReset("fadeout", m)
+				playBgm({source = "motif.title", interrupt = true})
+				main.close = true
+			end
+		elseif selectMode == 0 then
+			if getInput(-1, m.warning.confirm.key) then
+				if cursorPos[5] == 1 then 
+					sndPlay(motif.Snd, m.cancel.snd[1], m.cancel.snd[2])
+					main.f_fadeReset("fadeout", m)
+					playBgm({source = "motif.title", interrupt = true})
+					main.close = true
+					selectMode = 3
+				else 
+					sndPlay(motif.Snd, m.cancel.snd[1], m.cancel.snd[2])
+					selectMode = 1
+				end
+			elseif getInput(-1, m.warning.switch.key) then
+				sndPlay(motif.Snd, m.move.snd[1], m.move.snd[2])
+				cursorPos[5] = (cursorPos[5] == 1) and 2 or 1
+			end
 		else
 			-- Color picking
 			if selectMode == 1 then
-				if getInput(-1, 
-					type(m.cell.cursor.down.key) == "table" and m.cell.cursor.down.key or {m.cell.cursor.down.key}
-					) then
-					hold.D = hold.D + 1
-					if hold.D == 1 or (hold.D > 10 and dt % 4 == 1) then
-						sndPlay(motif.Snd, m.move.snd[1], m.move.snd[2])
-						if cursorPos[1] == rows then
-							cursorPos[1] = 1
-						else
-							cursorPos[1] = cursorPos[1] + 1
-						end
-					end
-				else
-					hold.D = 0
+				if getInput(-1, m.cell.cursor.down.key) then
+					sndPlay(motif.Snd, m.move.snd[1], m.move.snd[2])
+					cursorPos[1] = (cursorPos[1] == rows) and 1 or (cursorPos[1] + 1)
 				end
-				if getInput(-1,
-					type(m.cell.cursor.up.key) == "table" and m.cell.cursor.up.key or {m.cell.cursor.up.key}
-					) then
-					hold.U = hold.U + 1
-					if hold.U == 1 or (hold.U > 10 and dt % 4 == 1) then
-						sndPlay(motif.Snd, m.move.snd[1], m.move.snd[2])
-						if cursorPos[1] == 1 then
-							cursorPos[1] = rows
-						else
-							cursorPos[1] = cursorPos[1] - 1
-						end
-					end
-				else
-					hold.U = 0
+				if getInput(-1, m.cell.cursor.up.key) then
+					sndPlay(motif.Snd, m.move.snd[1], m.move.snd[2])
+					cursorPos[1] = (cursorPos[1] == 1) and rows or (cursorPos[1] - 1)
 				end
-				if getInput(-1, {m.cell.cursor.fwd.key}, 
-					type(m.cell.cursor.fwd.key) == "table" and m.cell.cursor.fwd.key or {m.cell.cursor.fwd.key}
-					) then
-					hold.F = hold.F + 1
-					if hold.F == 1 or (hold.F > 10 and dt % 4 == 1) then
-						sndPlay(motif.Snd, m.move.snd[1], m.move.snd[2])
-						if cursorPos[2] == cols + 1 then
-							cursorPos[2] = 2
-						else
-							cursorPos[2] = cursorPos[2] + 1
-						end
-					end
-				else
-					hold.F = 0
+				if getInput(-1, m.cell.cursor.fwd.key) then
+					sndPlay(motif.Snd, m.move.snd[1], m.move.snd[2])
+        			cursorPos[2] = (cursorPos[2] == cols + 1) and 2 or (cursorPos[2] + 1)
 				end
-				if getInput(-1, 
-					type(m.cell.cursor.back.key) == "table" and m.cell.cursor.back.key or {m.cell.cursor.back.key}
-					) then
-					hold.B = hold.B + 1
-					if hold.B == 1 or (hold.B > 10 and dt % 4 == 1) then
-						sndPlay(motif.Snd, m.move.snd[1], m.move.snd[2])
-						if cursorPos[2] == 2 then
-							cursorPos[2] = cols + 1
-						else
-							cursorPos[2] = cursorPos[2] - 1
-						end
-					end
-				else
-					hold.B = 0
+				if getInput(-1, m.cell.cursor.back.key) then
+					sndPlay(motif.Snd, m.move.snd[1], m.move.snd[2])
+        			cursorPos[2] = (cursorPos[2] == 2) and (cols + 1) or (cursorPos[2] - 1)
 				end
-				if getInput(-1, 
-					type(m.save.key) == "table" and m.save.key or {m.save.key}
-					) then
+				if getInput(-1, m.save.key) then
 					util.saveActFile(act, colorTable, #colorTable)
 					saveTextTimer = m.save.time
 					deletedTextTimer = 0
@@ -322,16 +273,12 @@ function start.f_colorEdit()
 					colorEditedFlag = true
 					changed = false
 					sndPlay(motif.Snd, m.done.snd[1], m.done.snd[2])
-				elseif getInput(-1, 
-					type(m.save.key) == "table" and m.delete.key or {m.delete.key}
-					) and main.f_fileExists(backup) then
+				elseif getInput(-1, m.delete.key) and main.f_fileExists(backup) then
 					saveTextTimer = 0
 					selectMode = 0.5
 					sndPlay(motif.Snd, m.done.snd[1], m.done.snd[2])
 				end
-				if getInput(-1, 
-					type(m.preview.prev.key) == "table" and m.preview.prev.key or {m.preview.prev.key}
-					) then
+				if getInput(-1, m.preview.prev.key) then
 					cursorPos[4] = cursorPos[4] - 1
 					if cursorPos[4] < 1 then
 						cursorPos[4] = #anims
@@ -340,9 +287,7 @@ function start.f_colorEdit()
 					anim = loadAnim(cursorPos[4])
 					copyPalData(anim, pal, colorTable, #colorTable)
 				end
-				if getInput(-1,
-					type(m.preview.next.key) == "table" and m.preview.next.key or {m.preview.next.key}
-					) then
+				if getInput(-1,m.preview.next.key) then
 					cursorPos[4] = cursorPos[4] + 1
 					if cursorPos[4] > #anims then
 						cursorPos[4] = 1
@@ -355,9 +300,7 @@ function start.f_colorEdit()
 			elseif selectMode == 2 then
 				local rgba = {colorTable[idx][1], colorTable[idx][2], colorTable[idx][3], colorTable[idx][4]}
 				
-				if getInput(-1, 
-					type(m.cell.cancel.key) == "table" and m.cell.cancel.key or {m.cell.cancel.key}
-					) then
+				if getInput(-1, m.cell.cancel.key) then
 					sndPlay(motif.Snd, m.cancel.snd[1], m.cancel.snd[2])
 					
 					animPaletteSet(anim, pal, {[idx] = {
@@ -370,85 +313,48 @@ function start.f_colorEdit()
 					colorTable = animPaletteGet(anim, pal)
 				end
 				
-				if getInput(-1, type(m.slider.increase.key) == "table" and m.slider.increase.key or {m.slider.increase.key}) or 
-					getInput(-1, type(m.slider.decrease.key) == "table" and m.slider.decrease.key or {m.slider.decrease.key}) then
-					speedStep = speedStep + 1
-					speed = util.clamp(0.05, math.ceil((speedStep ^ 2) * 0.001), 20)
-					speedCooldown = 5
-				elseif speedCooldown == 0 then
+				local tIncrease = getInputTime(-1, m.slider.increase.key)
+				local tDecrease = getInputTime(-1, m.slider.decrease.key)
+
+				if tIncrease > 0 or tDecrease > 0 then
+					local activeTime = math.max(tIncrease, tDecrease)
+					speed = util.clamp(1, math.ceil((activeTime ^ 2) * 0.001), 20)
+				else
 					speed = 0
-					speedStep = 0
-				end
-				
-				if getInput(-1, type(m.slider.decrease.key) == "table" and m.slider.decrease.key or {m.slider.decrease.key}) 
-				and colorTable[idx][cursorPos[3]] > 0 then
-					if hold.D == 0 then
-						rgba[cursorPos[3]] = rgba[cursorPos[3]] - 1
-					elseif hold.D > 5 then
-						if rgba[cursorPos[3]] - speed <= 0 then
-							rgba[cursorPos[3]] = 0
-						else
-							rgba[cursorPos[3]] = rgba[cursorPos[3]] - speed
-						end
-					end
-					
-					animPaletteSet(anim, pal, {[idx] = {
-						rgba[1],
-						rgba[2],
-						rgba[3],
-						rgba[4]}
-					})
-					
-					colorTable = animPaletteGet(anim, pal)
-					changed = true
-					hold.D = hold.D + 1
-				else
-					hold.D = 0
-				end
-				
-				if getInput(-1, type(m.slider.increase.key) == "table" and m.slider.increase.key or {m.slider.increase.key})
-				and colorTable[idx][cursorPos[3]] < 255 then
-					if hold.U == 0 then
-						rgba[cursorPos[3]] = rgba[cursorPos[3]] + 1
-					elseif hold.U > 5 then
-						if rgba[cursorPos[3]] + speed >= 255 then
-							rgba[cursorPos[3]] = 255
-						else
-							rgba[cursorPos[3]] = rgba[cursorPos[3]] + speed
-						end
-					end
-
-					animPaletteSet(anim, pal, { [idx] = {
-						rgba[1], 
-						rgba[2], 
-						rgba[3], 
-						rgba[4]} 
-					})
-					colorTable = animPaletteGet(anim, pal)
-					changed = true
-					hold.U = hold.U + 1
-				else
-					hold.U = 0
 				end
 
-				if getInput(-1, type(m.slider.next.key) == "table" and m.slider.next.key or {m.slider.next.key}) then
-					sndPlay(motif.Snd, m.move.snd[1], m.move.snd[2])
-					if cursorPos[3] == 4 then
-						cursorPos[3] = 1
-					else
-						cursorPos[3] = cursorPos[3] + 1
+				local function updateColor()
+					animPaletteSet(anim, pal, {[idx] = {rgba[1], rgba[2], rgba[3], rgba[4]}})
+					colorTable = animPaletteGet(anim, pal)
+					changed = true
+				end
+
+				if tDecrease > 0 and colorTable[idx][cursorPos[3]] > 0 then
+					if tDecrease == 1 or (tDecrease > 10 and tDecrease % 2 == 0) then
+						local val = rgba[cursorPos[3]] - (tDecrease > 10 and speed or 1)
+						rgba[cursorPos[3]] = math.max(0, val)
+						updateColor()
 					end
-				elseif getInput(-1, type(m.slider.prev.key) == "table" and m.slider.prev.key or {m.slider.prev.key}) then
-					sndPlay(motif.Snd, m.move.snd[1], m.move.snd[2])
-					if cursorPos[3] == 1 then
-						cursorPos[3] = 4
-					else
-						cursorPos[3] = cursorPos[3] - 1
+				end
+
+				if tIncrease > 0 and colorTable[idx][cursorPos[3]] < 255 then
+					if tIncrease == 1 or (tIncrease > 10 and tIncrease % 2 == 0) then
+						local val = rgba[cursorPos[3]] + (tIncrease > 10 and speed or 1)
+						rgba[cursorPos[3]] = math.min(255, val)
+						updateColor()
 					end
+				end
+
+				if getInput(-1, m.slider.next.key) then
+					sndPlay(motif.Snd, m.move.snd[1], m.move.snd[2])
+					cursorPos[3] = (cursorPos[3] == 4) and 1 or (cursorPos[3] + 1)
+				elseif getInput(-1, m.slider.prev.key) then
+					sndPlay(motif.Snd, m.move.snd[1], m.move.snd[2])
+					cursorPos[3] = (cursorPos[3] == 1) and 4 or (cursorPos[3] - 1)
 				end
 			-- Delete backup
 			elseif selectMode == 0.5 then
-				if getInput(-1, type(m.warning.confirm.key) == "table" and m.warning.confirm.key or {m.warning.confirm.key}) then
+				if getInput(-1, m.warning.confirm.key) then
 					if cursorPos[6] == 1 then
 						if os.remove(backup) then
 							deletedTextTimer = m.deleted.time
@@ -459,35 +365,16 @@ function start.f_colorEdit()
 					end
 					selectMode = 1
 				end
-				if getInput(-1, type(m.warning.switch.key) == "table" and m.warning.switch.key or {m.warning.switch.key}) then
+				if getInput(-1, m.warning.switch.key) then
 					sndPlay(motif.Snd, m.move.snd[1], m.move.snd[2])
-					if cursorPos[6] == 1 then
-						cursorPos[6] = 2
-					else
-						cursorPos[6] = 1
-					end
-				end
-			-- Warning
-			else
-				if changed == true and getInput(-1, type(m.warning.confirm.key) == "table" and m.warning.confirm.key or {m.warning.confirm.key})
-				and cursorPos[5] == 2 then
-					sndPlay(motif.Snd, m.cancel.snd[1], m.cancel.snd[2])
-					selectMode = 1
-				end
-				if changed == true and getInput(-1, type(m.warning.switch.key) == "table" and m.warning.switch.key or {m.warning.switch.key}) then
-					sndPlay(motif.Snd, m.move.snd[1], m.move.snd[2])
-					if cursorPos[5] == 1 then
-						cursorPos[5] = 2
-					else
-						cursorPos[5] = 1
-					end
+					cursorPos[6] = (cursorPos[6] == 1) and 2 or 1
 				end
 			end
 		end
 		
 		-- Change select states
 		if selectModeCooldown == 0 and selectMode ~= 0 then
-			if selectMode == 1 and getInput(-1, type(m.cell.select.key) == "table" and m.cell.select.key or {m.cell.select.key}) then
+			if selectMode == 1 and getInput(-1, m.cell.select.key) then
 				-- Save color table rgba for undo
 				selectColorData = {
 					colorTable[idx][1],
@@ -498,7 +385,7 @@ function start.f_colorEdit()
 				selectMode = 2
 				selectModeCooldown = 15
 				sndPlay(motif.Snd, m.done.snd[1], m.done.snd[2])
-			elseif getInput(-1, type(m.cell.confirm.key) == "table" and m.cell.confirm.key or {m.cell.confirm.key}) then
+			elseif getInput(-1, m.cell.confirm.key) then
 				selectMode = 1
 				selectModeCooldown = 15
 				sndPlay(motif.Snd, m.cancel.snd[1], m.cancel.snd[2])
@@ -506,10 +393,6 @@ function start.f_colorEdit()
 		end
 		
 		-- Timer decrements
-		if speedCooldown > 0 then
-			speedCooldown = speedCooldown - 1
-		end
-		
 		if selectModeCooldown > 0 then
 			selectModeCooldown = selectModeCooldown - 1
 		end
@@ -681,9 +564,9 @@ function start.f_colorEdit()
 		end
 		
 		main.f_fadeAnim(m)
-		if main.fadeActive or main.fadeCnt > 0 or main.fadeType == 'fadeout' then
-			main.f_cmdBufReset()
-		end
+		-- if main.fadeActive or main.fadeCnt > 0 or main.fadeType == 'fadeout' then
+		-- 	main.f_cmdBufReset()
+		-- end
 		refresh()
 	end
 end
@@ -709,54 +592,4 @@ function ifCharPalsLoaded(ref)
 	end
 	table.insert(LoadedPals, ref)
 	return false
-end
-
-function start.f_animGet(ref, side, member, params, velParams, loop, srcAnim)
-	if not ref then return nil end
-	local velParams = velParams or params
-	local pn = 2 * (member - 1) + side
-	-- Animation/sprite priority order
-	for _, v in ipairs({{params.anim, -1}, params.spr}) do
-		local anim = v[1]
-		if anim ~= nil and anim ~= -1 then
-			-- Determine whether to apply palette
-			local usePal = params.applypal or false
-			-- Try to load the animation
-			local a = animGetPreloadedCharData(ref, anim, v[2], loop)
-			if a then
-				local charData = start.f_getCharData(ref)
-				local xscale = start.f_getCharData(ref).portraitscale * motif.info.localcoord[1] / start.f_getCharData(ref).localcoord
-				local yscale = xscale
-				if v[2] == -1 then
-					xscale = xscale * (charData.cns_scale[1] or 1)
-					yscale = yscale * (charData.cns_scale[2] or 1)
-				end
-				animSetLocalcoord(a, motif.info.localcoord[1], motif.info.localcoord[2])
-				animSetLayerno(a, params.layerno)
-				animSetVelocity(a, velParams.velocity[1], velParams.velocity[2])
-				animSetMaxDist(a, velParams.maxdist[1], velParams.maxdist[2])
-				animSetAccel(a, velParams.accel[1], velParams.accel[2])
-				animSetFriction(a, velParams.friction[1], velParams.friction[2])
-				animSetPos(a, 0, 0)
-				animSetScale(a, params.scale[1] * xscale, params.scale[2] * yscale)
-				animSetFacing(a, params.facing)
-				animSetXShear(a, params.xshear)
-				animSetAngle(a, params.angle)
-				animSetXAngle(a, params.xangle)
-				animSetYAngle(a, params.yangle)
-				animSetProjection(a, params.projection)
-				animSetFocalLength(a, params.focallength)
-				animSetWindow(a, params.window[1], params.window[2], params.window[3], params.window[4])
-				if srcAnim ~= nil then
-					animApplyVel(a, srcAnim)
-				end
-				
-				a = start.loadPalettes(a, ref, 1, 1)
-				
-				animUpdate(a)
-				return a
-			end
-		end
-	end
-	return nil
 end
