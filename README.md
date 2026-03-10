@@ -24,7 +24,7 @@ This is the oldest nightly version this module works on, but it is
 recommended you always update your IKEMEN to the latest version.
 
 ## Default Controls
-
+```
 Move Cell Cursor: Directions (during Color Selecting)
 Select Color: A/LK (duing Color Selecting)
 Cancel Color: B/MK (during Color Editing)
@@ -34,3 +34,4 @@ Select RGBA: Left/Right (during Color Editing)
 Save Color: Start
 Cycle through animations: X/LP or Y/MP
 Delete Backup File: Z/HP
+```
