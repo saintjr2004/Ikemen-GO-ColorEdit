@@ -3,10 +3,9 @@
 ## Installation
 
 Place the `coloredit` folder into your `external/mods` directory.
-Alternatively, you can call coloredit.lua as a module in the config.ini file.
+Alternatively, you can call the path to `coloredit.lua` as a module in your `config.ini` file.
 
-The mp3 file is optional, but if you want to keep it as is you can move that to your `external/mods` folder
-or whatever folder you're moving the main files into as well.
+The mp3 file is optional, but if you want to keep it as is, you can place it in `coloredit` folder.
 
 Once you do that, you need to declare it as a mode in your
 `system.def file`. It should contain the following within the `[Title Info]`:
@@ -24,7 +23,7 @@ some of your lua modules will break. Just a heads up.
 This is the oldest nightly version this module works on, but it is
 recommended you always update your IKEMEN to the latest version.
 
-## Default Controls=
+## Default Controls
 
 Move Cell Cursor: Directions (during Color Selecting)
 Select Color: A/LK (duing Color Selecting)
