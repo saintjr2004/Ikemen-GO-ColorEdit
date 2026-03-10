@@ -1,4 +1,7 @@
-# IKEMEN GO Color Editor Module (2/2/26)
+# Color Editor Module for IKEMEN GO
+This is a color editor addon for IKEMEN GO that recreates the feature as seen in games like
+CvS2 and KOF13, where you can change the colors of the characters in the game as opposed to
+needing a 3rd party software like Fighter Factory to do it.
 
 ## Installation
 
