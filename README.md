@@ -20,6 +20,7 @@ Also due to the very recent nature of the nightly build,
 some of your lua modules will break. Just a heads up.
 
 `IKEMEN NIGHTLY VERSION: 03/08/26`
+
 This is the oldest nightly version this module works on, but it is
 recommended you always update your IKEMEN to the latest version.
 
