@@ -14,6 +14,11 @@ Once you do that, you need to declare it as a mode in your
 `system.def file`. It should contain the following within the `[Title Info]`:
 ```menu.itemname.coloredit = "COLOR EDIT"```
 
+## Configuration
+
+Within `coloredit.def`, there are various visual options you can tweak. It behaves like a standard `system.def` mode
+table (including `[BGdef]` and `[Info]`), so you should be familiar with how to modify its contents.
+
 ## Disclaimers
 
 Due to the rapid updating of IKEMEN nightly, this may
