@@ -21,10 +21,9 @@ table (including `[BGdef]` and `[Info]`), so you should be familiar with how to 
 
 ## Disclaimers
 
-Due to the rapid updating of IKEMEN nightly, this may
-break in future builds. Let me know if this happens.
-Also due to the very recent nature of the nightly build,
-some of your lua modules will break. Just a heads up.
+Due to the very experimental nature of this module it may break with future nightly builds more than other
+modules. Let me know immediately if new nightly versions break the module so I can fix it. Below is the oldest
+nightly version that supports the module. If you have an older one, please update your IKEMEN build.
 
 `IKEMEN NIGHTLY VERSION: 03/08/26`
 
